@@ -146,12 +146,25 @@ ${APPROVAL_NOTE} Overrides: name, symbol, description, website, twitter, telegra
 
       if (dryRun) {
         const sim = await simulate(conn, tx);
+        let simLine: string;
+        if (sim.ok) {
+          simLine = "✓ ok — this transaction would land";
+        } else if (sim.err?.includes("AccountNotFound")) {
+          const bal = await getSolBalance(conn, creatorPk).catch(() => 0);
+          simLine =
+            bal < 0.001
+              ? `✗ AccountNotFound — expected: the wallet holds ${sol(bal)}, so the network doesn't know it yet. ` +
+                `Fund ${file.publicKey} with ~${sol(needed)} and this exact pipeline will land.`
+              : `✗ ${sim.err}`;
+        } else {
+          simLine = `✗ ${sim.err}`;
+        }
         return text(`## Dry run complete — NOTHING was sent
 
 - Metadata uploaded: ${metadataUri}
 - Unsigned create tx built by PumpPortal, signed locally with mint + creator keys
 - Mint would be: ${mint}
-- Mainnet simulation: ${sim.ok ? "✓ ok" : `✗ ${sim.err}`}
+- Mainnet simulation: ${simLine}
 ${sim.logs.slice(-5).map((l) => `  ${l}`).join("\n")}
 
 Re-run with dry_run: false (and confirm: true) to launch for real.`);
