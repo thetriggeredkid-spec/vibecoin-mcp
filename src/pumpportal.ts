@@ -1,7 +1,18 @@
 import { PublicKey, VersionedTransaction } from "@solana/web3.js";
 import fs from "node:fs";
 import path from "node:path";
-import { DEFAULTS, ENDPOINTS } from "./config.js";
+import { DEFAULTS, ENDPOINTS, fallbackUrlFor } from "./config.js";
+
+/** POST that retries once against the vercel.app origin when vibecoin.fun DNS isn't set up yet. */
+export async function fetchWithFallback(url: string, init: RequestInit): Promise<Response> {
+  try {
+    return await fetch(url, init);
+  } catch (e) {
+    const fallback = fallbackUrlFor(url);
+    if (!fallback) throw e;
+    return fetch(fallback, init);
+  }
+}
 
 export interface TokenMeta {
   name: string;
@@ -85,7 +96,7 @@ export async function uploadMetadata(meta: TokenMeta): Promise<{ metadataUri: st
   if (jwt && jwt.length > 0) return uploadViaPinata(meta, jwt);
 
   const image = readImage(meta.imagePath);
-  const res = await fetch(ENDPOINTS.metadataUpload, {
+  const res = await fetchWithFallback(ENDPOINTS.metadataUpload, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({

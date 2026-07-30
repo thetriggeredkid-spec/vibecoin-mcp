@@ -117,6 +117,20 @@ describe("pumpportal client", () => {
     expect(body.imageContentType).toBe("image/png");
   });
 
+  it("falls back to the vercel.app origin when vibecoin.fun is unreachable", async () => {
+    fetchMock
+      .mockRejectedValueOnce(new TypeError("fetch failed: ENOTFOUND vibecoin.fun"))
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => ({ metadataUri: "https://blob/m.json" }),
+      });
+    const out = await uploadMetadata({ name: "T", symbol: "T", description: "d" });
+    expect(out.metadataUri).toBe("https://blob/m.json");
+    expect(fetchMock.mock.calls[0][0]).toBe("https://vibecoin.fun/api/metadata");
+    expect(fetchMock.mock.calls[1][0]).toBe("https://vibecoin-fun.vercel.app/api/metadata");
+  });
+
   it("uses Pinata two-upload flow when PINATA_JWT is set", async () => {
     process.env.PINATA_JWT = "jwt-token";
     const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "vibecoin-img-"));

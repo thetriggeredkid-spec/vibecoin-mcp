@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import { ENDPOINTS, LAUNCHES_FILE, VIBECOIN_HOME } from "./config.js";
+import { fetchWithFallback } from "./pumpportal.js";
 
 export interface LaunchRecord {
   mint: string;
@@ -36,7 +37,7 @@ export function recordLaunch(rec: LaunchRecord): void {
 /** Best-effort publish to the vibecoin.fun /projects registry. Never throws. */
 export async function postToSiteRegistry(rec: LaunchRecord): Promise<{ ok: boolean; note?: string }> {
   try {
-    const res = await fetch(ENDPOINTS.registry, {
+    const res = await fetchWithFallback(ENDPOINTS.registry, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(rec),

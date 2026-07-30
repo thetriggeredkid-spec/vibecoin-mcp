@@ -43,6 +43,21 @@ export const ENDPOINTS = {
   },
 };
 
+/** Same app, always-on origin — used automatically when vibecoin.fun DNS is unreachable. */
+export const FALLBACK_ORIGIN = "https://vibecoin-fun.vercel.app";
+
+export function fallbackUrlFor(url: string): string | null {
+  try {
+    const u = new URL(url);
+    if (u.hostname === "vibecoin.fun" || u.hostname === "www.vibecoin.fun") {
+      return `${FALLBACK_ORIGIN}${u.pathname}${u.search}`;
+    }
+  } catch {
+    // not a url — no fallback
+  }
+  return null;
+}
+
 export const MINTS = {
   SOL: "So11111111111111111111111111111111111111112",
   USDC: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
