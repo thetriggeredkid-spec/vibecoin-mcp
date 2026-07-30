@@ -1,0 +1,45 @@
+{
+  "name": "vibecoin-mcp",
+  "version": "0.1.0",
+  "description": "Launch your vibe coded app on Solana from Claude Code — pump.fun launchpad MCP server with local-only keys",
+  "type": "module",
+  "bin": {
+    "vibecoin-mcp": "dist/index.js"
+  },
+  "files": [
+    "dist",
+    "assets",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=18.17"
+  },
+  "scripts": {
+    "build": "tsc && node -e \"require('fs').chmodSync('dist/index.js', 0o755)\"",
+    "test": "vitest run",
+    "prepare": "npm run build"
+  },
+  "keywords": [
+    "mcp",
+    "solana",
+    "pump.fun",
+    "claude-code",
+    "launchpad"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/thetriggeredkid-spec/vibecoin-mcp.git"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.30.0",
+    "@solana/web3.js": "^1.98.4",
+    "bs58": "^6.0.0",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@types/node": "^26.1.2",
+    "typescript": "^7.0.2",
+    "vitest": "^3.2.7"
+  }
+}
